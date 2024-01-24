@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "dgSpecHash": "VxXKFYf6rwNWgrAGYY9I4vpNbfkX6l+/pfocQFgnIpoA+6i83Vi0wxYecSPwXrT2wct5CMpKg2myQLry89A6Pw==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\owenm\\source\\repos\\Entreprise\\Entreprise\\Entreprise.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\owenm\\.nuget\\packages\\litedb\\5.0.17\\litedb.5.0.17.nupkg.sha512",
+    "C:\\Users\\owenm\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\6.0.26\\microsoft.windowsdesktop.app.ref.6.0.26.nupkg.sha512",
+    "C:\\Users\\owenm\\.nuget\\packages\\microsoft.netcore.app.ref\\6.0.26\\microsoft.netcore.app.ref.6.0.26.nupkg.sha512",
+    "C:\\Users\\owenm\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\6.0.26\\microsoft.aspnetcore.app.ref.6.0.26.nupkg.sha512",
+    "C:\\Users\\owenm\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\6.0.26\\microsoft.netcore.app.host.win-x64.6.0.26.nupkg.sha512"
+  ],
+  "logs": []
+}

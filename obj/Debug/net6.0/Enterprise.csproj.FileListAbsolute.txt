@@ -1,0 +1,14 @@
+C:\Users\owenm\source\repos\Enterprise\bin\Debug\net6.0\Enterprise.exe
+C:\Users\owenm\source\repos\Enterprise\bin\Debug\net6.0\Enterprise.deps.json
+C:\Users\owenm\source\repos\Enterprise\bin\Debug\net6.0\Enterprise.runtimeconfig.json
+C:\Users\owenm\source\repos\Enterprise\bin\Debug\net6.0\Enterprise.dll
+C:\Users\owenm\source\repos\Enterprise\bin\Debug\net6.0\Enterprise.pdb
+C:\Users\owenm\source\repos\Enterprise\obj\Debug\net6.0\Enterprise.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\owenm\source\repos\Enterprise\obj\Debug\net6.0\Enterprise.AssemblyInfoInputs.cache
+C:\Users\owenm\source\repos\Enterprise\obj\Debug\net6.0\Enterprise.AssemblyInfo.cs
+C:\Users\owenm\source\repos\Enterprise\obj\Debug\net6.0\Enterprise.csproj.CoreCompileInputs.cache
+C:\Users\owenm\source\repos\Enterprise\obj\Debug\net6.0\Enterprise.dll
+C:\Users\owenm\source\repos\Enterprise\obj\Debug\net6.0\refint\Enterprise.dll
+C:\Users\owenm\source\repos\Enterprise\obj\Debug\net6.0\Enterprise.pdb
+C:\Users\owenm\source\repos\Enterprise\obj\Debug\net6.0\Enterprise.genruntimeconfig.cache
+C:\Users\owenm\source\repos\Enterprise\obj\Debug\net6.0\ref\Enterprise.dll
