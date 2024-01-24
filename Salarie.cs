@@ -11,12 +11,7 @@ namespace Entreprise
         public string Departement { get; set; }
         public string Poste { get; set; }
         public float Salaire { get; set; }
-
-        // Propriété calculée pour le matricule
-        public string Matricule
-        {
-            get; set;
-        }
+        public string Matricule { get; set; }
 
     }
 }
