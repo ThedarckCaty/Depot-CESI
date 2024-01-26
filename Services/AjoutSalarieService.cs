@@ -1,41 +1,33 @@
-﻿using Entreprise;
-using Entreprise.Interfaces;
+﻿using Entreprise.Interfaces;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Dapper;
+using System.Data.Common;
 
 namespace Entreprise.Services
 {
     public class AjoutSalarieService : IAjoutableSalarie
     {
+        private readonly SQLiteDbContext dbContext;
 
-        private readonly LiteDbContext dbContext;
-
-        public AjoutSalarieService(LiteDbContext dbContext)
+        public AjoutSalarieService(SQLiteDbContext dbContext)
         {
-            this.dbContext = dbContext;
+            this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
-        public void AjouterSalarie(Salarie salarie)
+        public void AjouterSalarie(Salarie nouveauSalarie)
         {
-            if (salarie != null)
-            {
-                dbContext.Salaries.Insert(salarie);
-                Console.Clear();
-                Console.WriteLine($"Salarié {salarie.Prenom} {salarie.Nom} ajouté avec succès.");
-                Console.ReadLine();
-                Console.Clear();
-            }
-            else
-            {
-                Console.Clear();
-                Console.WriteLine("Erreur : Le salarié est null.");
-                Console.ReadLine();
-                Console.Clear();
-            }
+            string sql = @"
+                INSERT INTO Salaries (Nom, Prenom, Adresse, Telephone, Departement, Poste, Salaire, Matricule)
+                VALUES (@Nom, @Prenom, @Adresse, @Telephone, @Departement, @Poste, @Salaire, @Matricule)"
+            ;
+
+            dbContext.Execute(sql, nouveauSalarie);
+
+            Console.Clear();
+            Console.WriteLine("Salarié ajouté avec succès.");
+            Console.WriteLine("\nAppuyez sur Entrée pour revenir au menu principal...");
+            Console.ReadLine();
+            Console.Clear();
         }
     }
-
 }

@@ -8,8 +8,19 @@ namespace Entreprise
 {
     public class Fournisseur : Personne
     {
-        public int NumeroFournisseur { get; set; }
-        public List<Produit> ProduitsFournis { get; set; } = new List<Produit>();
+
+
+        public int NumeroFournisseur { get; }
+
+        public Fournisseur()
+        {
+        }
+
+        public Fournisseur(int numeroFournisseur, string nom, string prenom, string adresse, string telephone)
+        : base(nom, prenom, adresse, telephone)
+        {
+            NumeroFournisseur = numeroFournisseur;
+        }
     }
 
 }

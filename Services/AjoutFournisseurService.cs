@@ -1,6 +1,7 @@
 ﻿using Entreprise.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,30 +13,27 @@ namespace Entreprise.Services
     public class AjoutFournisseurService : IAjoutableFournisseur
     {
 
-        private readonly LiteDbContext dbContext;
+        private readonly SQLiteDbContext dbContext;
 
-        public AjoutFournisseurService(LiteDbContext dbContext)
+        public AjoutFournisseurService(SQLiteDbContext dbContext)
         {
-            this.dbContext = dbContext;
+            this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
-        public void AjouterFournisseur(Fournisseur fournisseur)
+        public void AjouterFournisseur(Fournisseur nouveauFournisseur)
         {
-            if (fournisseur != null)
-            {
-                dbContext.Fournisseurs.Insert(fournisseur);
-                Console.Clear();
-                Console.WriteLine($"Fournisseur {fournisseur.Prenom} {fournisseur.Nom} ajouté avec succès.");
-                Console.ReadLine();
-                Console.Clear();
-            }
-            else
-            {
-                Console.Clear();
-                Console.WriteLine("Erreur : Le fournisseur est null.");
-                Console.ReadLine();
-                Console.Clear();
-            }
+            string sql = @"
+                INSERT INTO Fournisseurs (Nom, Prenom, Adresse, Telephone, NumeroFournisseur)
+                VALUES (@Nom, @Prenom, @Adresse, @Telephone, @NumeroFournisseur)"
+            ;
+
+            dbContext.Execute(sql, nouveauFournisseur);
+
+            Console.Clear();
+            Console.WriteLine("Fournisseur ajouté avec succès.");
+            Console.WriteLine("\nAppuyez sur Entrée pour revenir au menu principal...");
+            Console.ReadLine();
+            Console.Clear();
         }
     }
 }

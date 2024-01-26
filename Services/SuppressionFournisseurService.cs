@@ -1,6 +1,8 @@
 ﻿using Entreprise.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,42 +13,21 @@ namespace Entreprise.Services
 
     public class SuppressionFournisseurService : ISupprimableFournisseur
     {
-        private readonly LiteDbContext dbContext;
+        private readonly SQLiteDbContext dbContext;
 
-        public SuppressionFournisseurService(LiteDbContext dbContext)
+        public SuppressionFournisseurService(SQLiteDbContext dbContext)
         {
-            this.dbContext = dbContext;
+            this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
         public void SupprimerFournisseur(long idFournisseur)
         {
-            var collection = dbContext.Clients;
+            //dbContext.SupdbFournisseur(idFournisseur);
+            dbContext.Execute("DELETE FROM Fournisseurs WHERE Id = @Id", new { Id = idFournisseur });
 
-            var fournisseurASupprimer = collection.FindOne(x => x.Id == idFournisseur);
-            if (fournisseurASupprimer != null)
-            {
-                // Supprimez le fournisseur de la collection
-                collection.Delete(idFournisseur);
 
-                // Mettez à jour l'objet Entreprise (si nécessaire)
-                var entreprise = dbContext.Entreprise;
-                if (entreprise != null)
-                {
-                    entreprise.Clients.Remove(fournisseurASupprimer);
-                    dbContext.Entreprise = entreprise;
-                }
-                Console.Clear();
-                Console.WriteLine($"Client avec l'ID {idFournisseur} supprimé avec succès.");
-                Console.ReadLine();
-                Console.Clear();
-            }
-            else
-            {
-                Console.Clear();
-                Console.WriteLine($"Client avec l'ID {idFournisseur} non trouvé.");
-                Console.ReadLine();
-                Console.Clear();
-            }
+            Console.Clear();
+            Console.WriteLine($"Fournisseur avec l'ID {idFournisseur} supprimé avec succès.");
         }
     }
 }

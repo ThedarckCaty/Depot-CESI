@@ -9,13 +9,14 @@ using System;
 using Entreprise.Services;
 using System.ComponentModel.Design;
 
+
 namespace Entreprise
 {
     class Program
     {
         static void Main()
         {
-            LiteDbContext dbContext = new LiteDbContext();
+            SQLiteDbContext dbContext = new SQLiteDbContext();
                 while (true)
                     {
                      AfficherMenu();
@@ -50,27 +51,51 @@ namespace Entreprise
             Console.WriteLine("0 - Quitter");
         }
 
-        static void AfficherMenuEntreprise(LiteDbContext dbContext)
+        static void AfficherMenuEntreprise(SQLiteDbContext dbContext)
         {
 
 
             while (true)
             {
+                Console.Clear();
                 Console.WriteLine("Menu - Entreprise :");
                 Console.WriteLine("i - Information sur l'entreprise");
                 Console.WriteLine("1 - Créer un salarié");
                 Console.WriteLine("2 - Créer un fournisseur");
                 Console.WriteLine("3 - Créer un client");
-                Console.WriteLine("4 - Afficher les salariés");
-                Console.WriteLine("5 - Afficher les fournisseurs");
-                Console.WriteLine("6 - Afficher les clients");
-                Console.WriteLine("7 - Supprimer un salarié");
-                Console.WriteLine("8 - Supprimer un fournisseur");
-                Console.WriteLine("9 - Supprimer un client");
-                //Vérification a faire en cas de présence d'un fournisseurs sinon ne pas afficher le 10 et 11
-                Console.WriteLine("10 - Créer un produit");
-                Console.WriteLine("11 - Supprimer un produit");
+                if (dbContext.ObtenirSalaries().Any())
+                {
+                    Console.WriteLine("4 - Afficher les salariés");
+                }
+                if (dbContext.ObtenirFournisseurs().Any())
+                {
+                    Console.WriteLine("5 - Afficher les fournisseurs");
+                }
+                if (dbContext.ObtenirClients().Any())
+                {
+                    Console.WriteLine("6 - Afficher les clients");
+                }
+                if (dbContext.ObtenirSalaries().Any())
+                {
+                    Console.WriteLine("7 - Supprimer un salarié");
+                }
+                if (dbContext.ObtenirFournisseurs().Any())
+                {
+                    Console.WriteLine("8 - Supprimer un fournisseur");
+                }
+                if (dbContext.ObtenirClients().Any())
+                {
+                    Console.WriteLine("9 - Supprimer un client");
+                }
                 Console.WriteLine("0 - Retour");
+                if (dbContext.ObtenirFournisseurs().Any())
+                {
+                    Console.WriteLine("\nGestion Fournisseur");
+                    Console.WriteLine("10 - Créer un produit");
+                    Console.WriteLine("11 - Supprimer un produit");
+                    Console.WriteLine("0 - Retour");
+                }
+
                 Console.Write("Choix : ");
                 string choix = Console.ReadLine();
 
@@ -107,12 +132,31 @@ namespace Entreprise
                         dbContext.SupprimerClient();
                         break;
                     case "10":
-                        //
+                        if (dbContext.ObtenirFournisseurs().Any())
+                        {
+                            dbContext.AjouterProduit();
+                        }
+                        else
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Aucun fournisseur disponible. Veuillez en créer un d'abord.\n");
+                        }
                         break;
                     case "11":
-                        //
+                        if (dbContext.ObtenirFournisseurs().Any())
+                        {
+                            // Logique pour supprimer un produit
+                        }
+                        else
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Aucun fournisseur disponible. Veuillez en créer un d'abord.");
+                            Console.WriteLine("\nAppuyez sur Entrée pour revenir au menu principal...");
+                            Console.ReadLine();
+                        }
                         break;
                     case "0":
+                        Console.Clear();
                         return;
                     default:
                         Console.Clear();
@@ -122,12 +166,12 @@ namespace Entreprise
             }
         }
 
-        static void AfficherMenuClient(LiteDbContext dbContext)
+        static void AfficherMenuClient(SQLiteDbContext dbContext)
         {
             while (true)
             {
                 Console.WriteLine("Menu - Client :");
-                Console.WriteLine("1 - Créer un client");
+                Console.WriteLine("1 - Achat d'un produit");
                 Console.WriteLine("2 - Afficher les produits");
                 Console.WriteLine("0 - Quitter");
                 Console.Write("Choix : ");
@@ -139,7 +183,7 @@ namespace Entreprise
                         //
                         break;
                     case "2":
-                        //
+                        dbContext.AfficherProduits();
                         break;
                     case "0":
                         return;

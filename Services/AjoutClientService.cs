@@ -1,6 +1,7 @@
 ﻿using Entreprise.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,30 +14,27 @@ namespace Entreprise.Services
     public class AjoutClientService : IAjoutableClient
     {
 
-        private readonly LiteDbContext dbContext;
+        private readonly SQLiteDbContext dbContext;
 
-        public AjoutClientService(LiteDbContext dbContext)
+        public AjoutClientService(SQLiteDbContext dbContext)
         {
-            this.dbContext = dbContext;
+            this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
-        public void AjouterClient(Client client)
+        public void AjouterClient(Client nouveauClient)
         {
-            if (client != null)
-            {
-                dbContext.Clients.Insert(client);
-                Console.Clear();
-                Console.WriteLine($"Client {client.Prenom} {client.Nom} ajouté avec succès.");
-                Console.ReadLine();
-                Console.Clear();
-            }
-            else
-            {
-                Console.Clear();
-                Console.WriteLine("Erreur : Le client est null.");
-                Console.ReadLine();
-                Console.Clear();
-            }
+            string sql = @"
+                INSERT INTO Clients (Nom, Prenom, Adresse, Telephone, NumeroClient)
+                VALUES (@Nom, @Prenom, @Adresse, @Telephone, @NumeroClient)"
+            ;
+
+            dbContext.Execute(sql, nouveauClient);
+
+            Console.Clear();
+            Console.WriteLine("Client ajouté avec succès.");
+            Console.WriteLine("\nAppuyez sur Entrée pour revenir au menu principal...");
+            Console.ReadLine();
+            Console.Clear();
         }
     }
 

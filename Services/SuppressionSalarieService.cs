@@ -1,50 +1,26 @@
 ﻿using Entreprise.Interfaces;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Dapper;
+using System.Net.Sockets;
 
 namespace Entreprise.Services
 {
     public class SuppressionSalarieService : ISupprimableSalarie
     {
-        private readonly LiteDbContext dbContext;
+        private readonly SQLiteDbContext dbContext;
 
-        public SuppressionSalarieService(LiteDbContext dbContext)
+        public SuppressionSalarieService(SQLiteDbContext dbContext)
         {
-            this.dbContext = dbContext;
+            this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
         public void SupprimerSalarie(long idSalarie)
         {
-            var collection = dbContext.Salaries;
+            // Utilisez Dapper pour exécuter la requête de suppression
+            dbContext.Execute("DELETE FROM Salaries WHERE Id = @Id", new { Id = idSalarie });
 
-            var salarieASupprimer = collection.FindOne(x => x.Id == idSalarie);
-            if (salarieASupprimer != null)
-            {
-                // Supprimez le salarié de la collection
-                collection.Delete(idSalarie);
-
-                // Mettez à jour l'objet Entreprise (si nécessaire)
-                var entreprise = dbContext.Entreprise;
-                if (entreprise != null)
-                {
-                    entreprise.Salaries.Remove(salarieASupprimer);
-                    dbContext.Entreprise = entreprise;
-                }
-                Console.Clear();
-                Console.WriteLine($"Salarié avec l'ID {idSalarie} supprimé avec succès.");
-                Console.ReadLine();
-                Console.Clear();
-            }
-            else
-            {
-                Console.Clear();
-                Console.WriteLine($"Salarié avec l'ID {idSalarie} non trouvé.");
-                Console.ReadLine();
-                Console.Clear();
-            }
+            Console.Clear();
+            Console.WriteLine($"Salarié avec l'ID {idSalarie} supprimé avec succès.");
         }
     }
 }
