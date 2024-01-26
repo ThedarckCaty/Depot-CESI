@@ -310,16 +310,6 @@ namespace Entreprise
             Console.Clear();
         }
 
-
-
-
-
-
-
-
-
-
-
         /// <summary>
         /// Affiche la liste des salariés en paginant les résultats pour une meilleure lisibilité sur la console.
         /// Si aucun salarié n'existe alors, cela affiche un message d'erreur.
@@ -1089,9 +1079,6 @@ namespace Entreprise
                 }
             }
 
-
-
-
             while (string.IsNullOrWhiteSpace(nom))
             {
                 Console.Write("Nom du produit : ");
@@ -1142,32 +1129,6 @@ namespace Entreprise
             // Appel du service d'ajout d'un produit
             ajoutProduitService.AjouterProduit(nouveauProduit);
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         /// <summary>
         /// Permet à l'utilisateur de saisir les informations pour un achat d'un produit,
@@ -1294,29 +1255,6 @@ namespace Entreprise
             venteProduitService.GestionAchat(nouvelleAchat, quantiteDisp);
             
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
         /// <summary>
