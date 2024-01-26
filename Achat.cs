@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,19 +9,38 @@ namespace Entreprise
 {
     public class Achat
     {
-        public int NumeroAchat { get; }
-        public List<Produit> ProduitsAchetes { get; set; } = new List<Produit>();
-        public Client Client { get; set; }
+        public int NumeroAchat { get; set; }
+        public string Reference { get; set; }
+        public string Nom {  get; set; }
+        public int IdClient { get; set; }
+        public int QuantiteProduitAchete { get; set; }
         public DateTime DateAchat { get; set; }
 
-        public Achat(int numeroAchat, List<Produit> produitsAchetes, Client client, DateTime dateAchat)
+        public Achat()
+        {
+
+        }
+        public Achat(string referenceProduit, string nomProduit, int idclient, int quantiteProduitAchete, DateTime dateAchatProduit)
+        {
+            Reference = referenceProduit;
+            Nom = nomProduit;
+            IdClient = idclient;
+            QuantiteProduitAchete = quantiteProduitAchete;
+            DateAchat = dateAchatProduit;
+        }
+
+        public Achat(int numeroAchat, string referenceProduit, string nomProduit, int idclient, int quantiteProduitAchete, DateTime dateAchatProduit)
         {
             NumeroAchat = numeroAchat;
-            ProduitsAchetes = produitsAchetes ?? new List<Produit>();
-            Client = client;
-            DateAchat = dateAchat;
+            Reference = referenceProduit;
+            Nom = nomProduit;
+            IdClient = idclient;
+            QuantiteProduitAchete = quantiteProduitAchete;
+            DateAchat = dateAchatProduit;
         }
     }
 
 
 }
+
+

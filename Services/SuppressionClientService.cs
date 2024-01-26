@@ -20,6 +20,8 @@ namespace Entreprise.Services
         public void SupprimerClient(long idClient)
         {
             dbContext.Execute("DELETE FROM Clients WHERE Id = @Id", new { Id = idClient });
+            dbContext.Execute("DELETE FROM Achats WHERE IdClient = @Id", new { Id = idClient });
+
 
             Console.Clear();
             Console.WriteLine($"Client avec l'ID {idClient} supprimé avec succès.");

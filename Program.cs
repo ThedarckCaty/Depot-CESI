@@ -35,6 +35,7 @@ namespace Entreprise
                                 AfficherMenuClient(dbContext);
                                 break;
                             case "0":
+                                Console.Clear();
                                 return;
                             default:
                                 Console.Clear();
@@ -92,7 +93,11 @@ namespace Entreprise
                 {
                     Console.WriteLine("\nGestion Fournisseur");
                     Console.WriteLine("10 - Créer un produit");
-                    Console.WriteLine("11 - Supprimer un produit");
+                    if (dbContext.ObtenirProduits().Any())
+                    {
+                        Console.WriteLine("11 - Supprimer un produit");
+                    }
+                    Console.WriteLine("12 - Afficher les ventes");
                     Console.WriteLine("0 - Retour");
                 }
 
@@ -145,7 +150,20 @@ namespace Entreprise
                     case "11":
                         if (dbContext.ObtenirFournisseurs().Any())
                         {
-                            // Logique pour supprimer un produit
+                            dbContext.SupprimerProduit();
+                        }
+                        else
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Aucun fournisseur disponible. Veuillez en créer un d'abord.");
+                            Console.WriteLine("\nAppuyez sur Entrée pour revenir au menu principal...");
+                            Console.ReadLine();
+                        }
+                        break;
+                    case "12":
+                        if (dbContext.ObtenirFournisseurs().Any())
+                        {
+                            dbContext.AfficherVentes();
                         }
                         else
                         {
@@ -168,24 +186,36 @@ namespace Entreprise
 
         static void AfficherMenuClient(SQLiteDbContext dbContext)
         {
+            Console.Clear();
             while (true)
             {
                 Console.WriteLine("Menu - Client :");
-                Console.WriteLine("1 - Achat d'un produit");
-                Console.WriteLine("2 - Afficher les produits");
-                Console.WriteLine("0 - Quitter");
+                if (dbContext.ObtenirProduits().Any())
+                {
+                    Console.WriteLine("1 - Achat d'un produit");
+                    Console.WriteLine("2 - Afficher les produits");
+                }
+                if (dbContext.ObtenirAchats().Any())
+                {
+                    Console.WriteLine("3 - Afficher les achats");
+                }
+                Console.WriteLine("0 - Retour");
                 Console.Write("Choix : ");
                 string choix = Console.ReadLine();
 
                 switch (choix)
                 {
                     case "1":
-                        //
+                        dbContext.AchatProduit();
                         break;
                     case "2":
                         dbContext.AfficherProduits();
                         break;
+                    case "3":
+                        dbContext.AfficherAchats();
+                        break;
                     case "0":
+                        Console.Clear();
                         return;
                     default:
                         Console.WriteLine("Choix invalide. Veuillez réessayer.\n");

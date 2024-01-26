@@ -22,12 +22,24 @@ namespace Entreprise.Services
 
         public void SupprimerFournisseur(long idFournisseur)
         {
-            //dbContext.SupdbFournisseur(idFournisseur);
+            // Récupérer les références des produits associés au fournisseur
+            var referencesProduits = dbContext.GetReferencesProduits(idFournisseur);
+
+            // Supprimer le fournisseur de la table Fournisseurs
             dbContext.Execute("DELETE FROM Fournisseurs WHERE Id = @Id", new { Id = idFournisseur });
 
+            // Supprimer les produits associés au fournisseur
+            dbContext.Execute("DELETE FROM Produits WHERE IdFournisseur = @Id", new { Id = idFournisseur });
+
+            // Supprimer les achats associés aux références des produits
+            foreach (var reference in referencesProduits)
+            {
+                dbContext.Execute("DELETE FROM Achats WHERE Reference = @Reference", new { Reference = reference });
+            }
 
             Console.Clear();
             Console.WriteLine($"Fournisseur avec l'ID {idFournisseur} supprimé avec succès.");
         }
+
     }
 }

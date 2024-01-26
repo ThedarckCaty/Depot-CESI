@@ -16,7 +16,6 @@ namespace Entreprise.Services
 
         public void SupprimerSalarie(long idSalarie)
         {
-            // Utilisez Dapper pour exécuter la requête de suppression
             dbContext.Execute("DELETE FROM Salaries WHERE Id = @Id", new { Id = idSalarie });
 
             Console.Clear();

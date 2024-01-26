@@ -4,6 +4,7 @@ using System.Data.SQLite;
 using Dapper;
 using System.Text;
 using System.Data.Entity;
+using System.Net.Sockets;
 
 
 namespace Entreprise
@@ -70,6 +71,9 @@ namespace Entreprise
                     )
                 ");
 
+           // dbConnection.Execute("DROP TABLE IF EXISTS Achats");
+           // dbConnection.Execute("DROP TABLE IF EXISTS Produits");
+
             dbConnection.Execute(@"
                     CREATE TABLE IF NOT EXISTS Produits (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -78,6 +82,20 @@ namespace Entreprise
                         Nom TEXT NOT NULL,
                         Prix REAL NOT NULL,
                         Quantite INTEGER NOT NULL
+                    )
+                ");
+
+
+
+            dbConnection.Execute(@"
+                    CREATE TABLE IF NOT EXISTS Achats (
+                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        NumeroAchat INTEGER,
+                        Reference TEXT NOT NULL,
+                        Nom TEXT NOT NULL,
+                        IdClient INTEGER NOT NULL,
+                        QuantiteProduitAchete INTEGER NOT NULL,
+                        DateAchat DATETIME NOT NULL
                     )
                 ");
 
@@ -140,7 +158,38 @@ namespace Entreprise
         /// <returns>Une liste d'objets de type Produit représentant les produits.</returns>
         public List<Produit> ObtenirProduits()
         {
-            return dbConnection.Query<Produit>("SELECT * FROM Produits").AsList();
+            return dbConnection.Query<Produit>("SELECT * FROM Produits Where Quantite > 0").AsList();
+        }
+
+        /// <summary>
+        /// Récupère la liste de tous les achats depuis la base de données.
+        /// </summary>
+        /// <returns>Une liste d'objets de type Achats représentant les achats des clients.</returns>
+        public List<Achat> ObtenirAchats()
+        {
+            return dbConnection.Query<Achat>("SELECT * FROM Achats").AsList();
+        }
+
+        /// <summary>
+        /// Récupère la liste de tous les achats d'un client spécifique depuis la base de données.
+        /// </summary>
+        /// <param name="idClient">L'ID du client pour lequel récupérer les achats.</param>
+        /// <returns>Une liste d'objets de type Achat représentant les achats du client.</returns>
+        public List<Achat> ObtenirAchats(int idClient)
+        {
+            return dbConnection.Query<Achat>("SELECT * FROM Achats WHERE IdClient = @IdClient", new { IdClient = idClient }).AsList();
+        }
+
+
+        public string GetReferenceById(long idProduit)
+        {
+            return dbConnection.QueryFirstOrDefault<string>(
+                "SELECT Reference FROM Produits WHERE Id = @Id", new { Id = idProduit });
+        }
+
+        public List<String> GetReferencesProduits(long idFournisseur)
+        {
+            return dbConnection.Query<String>("SELECT Reference FROM Produits WHERE IdFournisseur = @Id", new { Id = idFournisseur }).ToList();
         }
 
 
@@ -182,6 +231,95 @@ namespace Entreprise
 
 
 
+
+
+
+
+
+
+        /// <summary>
+        /// Affiche la liste des achats en paginant les résultats pour une meilleure lisibilité sur la console.
+        /// Si le client n'existe pas ou s'il n'a pas d'achats, cela affiche un message approprié.
+        /// </summary>
+        public void AfficherAchats()
+        {
+            Console.Clear();
+            var clients = ObtenirClients();
+
+            if (clients.Count == 0)
+            {
+                Console.WriteLine("[Erreur] - Il n'y a pas de clients !");
+                Console.WriteLine("\nAppuyez sur Entrée pour revenir au menu principal...");
+                Console.ReadLine();
+                Console.Clear();
+                return;
+            }
+
+            Console.WriteLine("Liste des clients :");
+
+            foreach (var client in clients)
+            {
+                Console.WriteLine($"{client.Id} - {client.Prenom} {client.Nom}");
+            }
+
+            Console.Write("Saisir l'ID du client pour afficher les achats : ");
+            int idClient;
+
+            while (!int.TryParse(Console.ReadLine(), out idClient) || !clients.Any(c => c.Id == idClient))
+            {
+                Console.WriteLine("Veuillez saisir un ID client valide.");
+                Console.Write("Saisir l'ID du client pour afficher les achats : ");
+            }
+
+            // Obtenir les achats du client
+            var achats = this.ObtenirAchats(idClient);
+
+            if (achats.Count() != 0)
+            {
+                Console.OutputEncoding = Encoding.UTF8;
+                Console.Clear();
+
+                const int itemsPerPage = 10;
+                int pageCount = (int)Math.Ceiling((double)achats.Count() / itemsPerPage);
+
+                for (int page = 1; page <= pageCount; page++)
+                {
+                    Console.Clear();
+                    Console.WriteLine($"Page {page}/{pageCount} - Liste des achats du client :");
+
+                    var achatsPage = achats.Skip((page - 1) * itemsPerPage).Take(itemsPerPage);
+
+                    foreach (var achat in achatsPage)
+                    {
+                        Console.WriteLine($"{achat.Reference} - {achat.Nom} - Quantité : {achat.QuantiteProduitAchete} - Date : {achat.DateAchat}");
+                    }
+
+                    Console.WriteLine("\nAppuyez sur Entrée pour afficher la page suivante...");
+
+                    Console.ReadLine();
+                }
+            }
+            else
+            {
+                Console.Clear();
+                Console.WriteLine("Le client n'a pas d'achats.");
+                Console.WriteLine("\nAppuyez sur Entrée pour revenir au menu principal...");
+                Console.ReadLine();
+            }
+
+            Console.Clear();
+        }
+
+
+
+
+
+
+
+
+
+
+
         /// <summary>
         /// Affiche la liste des salariés en paginant les résultats pour une meilleure lisibilité sur la console.
         /// Si aucun salarié n'existe alors, cela affiche un message d'erreur.
@@ -220,6 +358,50 @@ namespace Entreprise
                 // Affiche un message d'erreur si aucun salarié n'est trouvé.
                 Console.Clear();
                 Console.WriteLine("[Erreur] - Il n'y a pas de salariés !");
+                Console.WriteLine("\nAppuyez sur Entrée pour revenir au menu principal...");
+                Console.ReadLine();
+            }
+            Console.Clear();
+        }
+
+        /// <summary>
+        /// Affiche la liste des ventes en paginant les résultats pour une meilleure lisibilité sur la console.
+        /// Si aucune vente n'existe alors, cela affiche un message d'erreur.
+        /// </summary>
+        public void AfficherVentes()
+        {
+            var ventes = this.ObtenirAchats();
+
+            if (ventes.Count() != 0)
+            {
+                Console.OutputEncoding = Encoding.UTF8; // Permet de choisir l'encodage pour l'utilisation du € qui ne passe pas sans
+                Console.Clear();
+
+                const int itemsPerPage = 10; // Nombre d'éléments par page
+                int pageCount = (int)Math.Ceiling((double)ventes.Count() / itemsPerPage);
+
+                for (int page = 1; page <= pageCount; page++)
+                {
+                    Console.Clear(); // Nettoyage de l'écran de la console
+                    Console.WriteLine($"Page {page}/{pageCount} - Liste des ventes :");
+
+                    var ventesPage = ventes.Skip((page - 1) * itemsPerPage).Take(itemsPerPage);
+
+                    foreach (var vente in ventesPage)
+                    {
+                        Console.WriteLine($"Id du client {vente.IdClient} - Info N° {vente.NumeroAchat} Nom produit {vente.Nom} - {vente.QuantiteProduitAchete}");
+                    }
+
+                    Console.WriteLine("\nAppuyez sur Entrée pour afficher la page suivante...");
+
+                    Console.ReadLine();
+                }
+            }
+            else
+            {
+                // Affiche un message d'erreur si aucunes ventes n'est trouvées.
+                Console.Clear();
+                Console.WriteLine("[Erreur] - Il n'y a pas de ventes !");
                 Console.WriteLine("\nAppuyez sur Entrée pour revenir au menu principal...");
                 Console.ReadLine();
             }
@@ -510,6 +692,57 @@ namespace Entreprise
             Console.ReadLine();
             Console.Clear(); // Effacer la console avant de revenir au menu principal
         }
+
+
+
+        /// <summary>
+        /// Affiche la liste des clients, permet à l'utilisateur de saisir l'ID d'un client à supprimer,
+        /// puis appelle le service de suppression pour effectuer la suppression.
+        /// Affiche un message d'erreur si aucun client n'existe.
+        /// </summary>
+        public void SupprimerProduit()
+        {
+            // Initialisation du service de suppression des produits
+            var suppressionProduitService = new SuppressionProduitService(this);
+
+            // Obtention de la liste des produits
+            var produits = ObtenirProduits();
+
+            if (produits.Count != 0)
+            {
+                Console.OutputEncoding = Encoding.UTF8;
+                Console.Clear();
+                Console.WriteLine("Liste des produits:");
+
+                foreach (var produit in produits)
+                {
+                    Console.WriteLine($"{produit.Id} - {produit.Nom}");
+                }
+
+                Console.Write("Saisir l'ID du produit à retirer : ");
+                long idProduit;
+
+                // Boucle de saisie sécurisée pour obtenir un ID valide
+                while (!long.TryParse(Console.ReadLine(), out idProduit) || !produits.Any(s => s.Id == idProduit))
+                {
+                    Console.WriteLine("Veuillez saisir un ID valide.");
+                }
+
+                // Appel du service de suppression avec l'ID du produit à supprimer
+                suppressionProduitService.SupprimerProduit(idProduit);
+            }
+            else
+            {
+                // Affiche un message d'erreur si aucun produit n'existe.
+                Console.Clear();
+                Console.WriteLine("[Erreur] - Il n'y a pas de produits !");
+            }
+
+            Console.WriteLine("\nAppuyez sur Entrée pour revenir au menu principal...");
+            Console.ReadLine();
+            Console.Clear(); // Effacer la console avant de revenir au menu principal
+        }
+
 
 
 
@@ -909,6 +1142,181 @@ namespace Entreprise
             // Appel du service d'ajout d'un produit
             ajoutProduitService.AjouterProduit(nouveauProduit);
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        /// <summary>
+        /// Permet à l'utilisateur de saisir les informations pour un achat d'un produit,
+        /// valide chaque champ et achete le produit en utilisant le service d'achat de produit.
+        /// </summary>
+        public void AchatProduit()
+        {
+            int rowCount = dbConnection.ExecuteScalar<int>("SELECT COUNT(*) FROM Achats;");
+
+            // Réinitialisation de la séquence d'auto-incrémentation uniquement si la table est vide
+            if (rowCount == 0)
+            {
+                dbConnection.Execute("UPDATE SQLITE_SEQUENCE SET SEQ=0 WHERE NAME='Achats';");
+            }
+
+            // Initialisation du service d'achat de produit
+            var achatProduitService = new AchatProduitService(this);
+            var venteProduitService = new VenteProduitService(this);
+
+            // Efface la console pour une meilleure lisibilité
+            Console.Clear();
+
+            // Initialisation des variables pour stocker les informations du produit pour l'achat
+            string referenceProduit = string.Empty;
+            int numeroAchat = 0;
+            string nomProduit = string.Empty;
+            int quantiteProduitAchete;
+            int idClient;
+            int idProduit = 0;
+            DateTime dateAchatProduit;
+            // Vérification de l'existence de clients
+            var clients = ObtenirClients();
+
+            if (clients.Count == 0)
+            {
+                Console.WriteLine("[Erreur] - Il n'y a pas de clients !");
+                Console.WriteLine("\nAppuyez sur Entrée pour revenir au menu principal...");
+                Console.ReadLine();
+                return;
+            }
+
+            // Saisie sécurisée des informations du client avec des boucles de validation
+            Console.OutputEncoding = Encoding.UTF8;
+            Console.Clear();
+            Console.WriteLine("Liste des clients:");
+
+            foreach (var client in clients)
+            {
+                Console.WriteLine($"{client.Id} - {client.Prenom} {client.Nom}");
+            }
+
+            while (true)
+            {
+                Console.Write("Saisir l'ID du client : ");
+
+                if (int.TryParse(Console.ReadLine(), out idClient) && clients.Any(c => c.Id == idClient))
+                {
+                    break; // Sortir de la boucle si l'ID est valide
+                }
+                else
+                {
+                    Console.WriteLine("Veuillez saisir un ID client valide.");
+                }
+            }
+
+            // Vérification de l'existence de produits
+            var produits = ObtenirProduits();
+
+            if (produits.Count == 0)
+            {
+                Console.WriteLine("[Erreur] - Il n'y a pas de produits !");
+                Console.WriteLine("\nAppuyez sur Entrée pour revenir au menu principal...");
+                Console.ReadLine();
+                return;
+            }
+
+            Console.Clear();
+            Console.WriteLine("Liste des produits:");
+
+            foreach (var produit in produits)
+            {
+                Console.WriteLine($"{produit.Id} - {produit.Nom} - Quantité : {produit.Quantite} - Prix : {produit.Prix}€");
+            }
+
+            while (true)
+            {
+                Console.Write("Saisir l'ID du produit : ");
+
+                if (int.TryParse(Console.ReadLine(), out idProduit) && produits.Any(p => p.Id == idProduit))
+                {
+                    break; // Sortir de la boucle si l'ID est valide
+                }
+                else
+                {
+                    Console.WriteLine("Veuillez saisir un ID produit valide.");
+                }
+            }
+
+            DateTime dateActuelle = DateTime.Now;
+
+            string query = $"SELECT * FROM Produits WHERE Id = @Id";
+            Produit produitAchat = dbConnection.QueryFirstOrDefault<Produit>(query, new { Id = idProduit });
+            int quantiteDisp = produitAchat.Quantite;
+
+            while(true)
+{
+                Console.Write($"Saisir la quantité (disponible : {quantiteDisp}) : ");
+
+                if (int.TryParse(Console.ReadLine(), out quantiteProduitAchete) && quantiteProduitAchete > 0 && quantiteProduitAchete <= quantiteDisp)
+                {
+                    break; // Sortir de la boucle si la quantité est valide
+                }
+                else
+                {
+                    Console.WriteLine($"Veuillez saisir une quantité valide (disponible : {quantiteDisp}).");
+                }
+            }
+
+            // Création d'un nouvelle achat avec une référence générée
+            Achat nouvelleAchat = new(produitAchat.Reference, produitAchat.Nom, idClient, quantiteProduitAchete, dateActuelle);
+
+            // Appel du service d'achat de produit
+            achatProduitService.AcheterProduit(nouvelleAchat);
+            venteProduitService.GestionAchat(nouvelleAchat, quantiteDisp);
+            
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         /// <summary>
